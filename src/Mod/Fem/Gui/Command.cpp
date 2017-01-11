@@ -1126,6 +1126,19 @@ mb = []\n\
 for i in range(len(sValues)):\n\
     peak.append(sValues[i])\n\
     mb.append(bending[i] + membrane[0])\n\
+print 'Membrane Stress = '+ str(round(membrane[0],2))+ (\"MPa\")\n\
+if mb[0]>mb[len(t_coords)-1]:\n\
+    print 'Minimum Membrane + Bending Stress = '+ str(round(mb[len(t_coords)-1],2))+ (\"MPa\")\n\
+    print 'Maximum Membrane + Bending Stress = '+ str(round(mb[0],2))+ (\"MPa\")\n\
+else:\n\
+    print 'Maximum Membrane + Bending Stress = '+ str(round(mb[len(t_coords)-1],2))+ (\"MPa\")\n\
+    print 'Minimum Membrane + Bending Stress = '+ str(round(mb[0],2))+ (\"MPa\")\n\
+if peak[0]>peak[len(t_coords)-1]:\n\
+    print 'Minimum Total Stress = '+ str(round(peak[len(t_coords)-1],2))+ (\"MPa\")\n\
+    print 'Maximum Total Stress = '+ str(round(peak[0],2))+ (\"MPa\")\n\
+else:\n\
+    print 'Maximum Total Stress = '+ str(round(peak[len(t_coords)-1],2))+ (\"MPa\")\n\
+    print 'Minimum Total Stress = '+ str(round(peak[0],2))+ (\"MPa\")\n\
 import FreeCAD\n\
 import numpy as np\n\
 from matplotlib import pyplot as plt\n\
@@ -1138,16 +1151,6 @@ plt.annotate(str(round(mb[0],2)), xy=(t_coords[0], mb[0]), xytext=(t_coords[0], 
 plt.annotate(str(round(mb[len(t_coords)-1],2)), xy=(t_coords[len(t_coords)-1], mb[len(t_coords)-1]), xytext=(t_coords[len(t_coords)-1], mb[len(t_coords)-1]))\n\
 plt.annotate(str(round(peak[0],2)), xy=(t_coords[0], peak[0]), xytext=(t_coords[0], peak[0]))\n\
 plt.annotate(str(round(peak[len(t_coords)-1],2)), xy=(t_coords[len(t_coords)-1], peak[len(t_coords)-1]), xytext=(t_coords[len(t_coords)-1], peak[len(t_coords)-1]))\n\
-FreeCAD.Console.PrintError('membrane stress = ')\n\
-FreeCAD.Console.PrintError([str(round(membrane[0],2))])\n\
-FreeCAD.Console.PrintError('membrane + bending min = ')\n\
-FreeCAD.Console.PrintError([str(round(mb[0],2))])\n\
-FreeCAD.Console.PrintError('membrane + bending  max = ')\n\
-FreeCAD.Console.PrintError([str(round(mb[len(t_coords)-1],2))])\n\
-FreeCAD.Console.PrintError('Total stress min = ')\n\
-FreeCAD.Console.PrintError([str(round(peak[0],2))])\n\
-FreeCAD.Console.PrintError('Total stress max = ')\n\
-FreeCAD.Console.PrintError([str(round(peak[len(t_coords)-1],2))])\n\
 plt.legend([\"Membrane\", \"Membrane and Bending\", \"Total\"], loc = \"best\")\n\
 plt.xlabel(\"Thickness [mm] \")\n\
 plt.ylabel(\"Stress [MPa]\")\n\
