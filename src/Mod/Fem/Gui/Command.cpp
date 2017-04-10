@@ -1557,6 +1557,18 @@ void CmdFemPostPipelineFromResult::activated(int)
         Base::Console().Message("Debug: FemResultObject pointer = %p", result );
 
     */
+
+    // go through active document
+    Gui::Document* doc = Gui::Application::Instance->activeDocument();
+    App::Document* app = doc->getDocument();
+    const std::vector<App::DocumentObject*> obj = app->getObjectsOfType
+        (App::DocumentObject::getClassTypeId());
+
+    for (std::vector<App::DocumentObject*>::const_iterator it=obj.begin();it!=obj.end();++it) {
+        doCommand(Gui,"Gui.getDocument(\"%s\").getObject(\"%s\").Visibility=False"
+                     , app->getName(), (*it)->getNameInDocument());
+    }
+
     App::Document* pcDoc = App::GetApplication().getActiveDocument();
     if(!pcDoc)
     {
