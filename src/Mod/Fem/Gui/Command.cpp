@@ -1204,6 +1204,29 @@ bool CmdFemPostCreateDataAlongLineFilter::isActive(void)
     return hasActiveDocument();
 }
 
+DEF_STD_CMD_A(CmdFemPostCreateDataAtPointFilter);
+
+CmdFemPostCreateDataAtPointFilter::CmdFemPostCreateDataAtPointFilter()
+  : Command("Fem_PostCreateDataAtPointFilter")
+{
+    sAppModule      = "Fem";
+    sGroup          = QT_TR_NOOP("Fem");
+    sMenuText       = QT_TR_NOOP("Define/create a clip filter which clips a field data at point");
+    sToolTipText    = QT_TR_NOOP("Define/create a clip filter which clips a field data at point");
+    sWhatsThis      = "Fem_PostCreateDataAtPointFilter";
+    sStatusTip      = sToolTipText;
+    sPixmap         = "fem-DataAtPoint";
+}
+
+void CmdFemPostCreateDataAtPointFilter::activated(int)
+{
+}
+
+bool CmdFemPostCreateDataAtPointFilter::isActive(void)
+{
+    return hasActiveDocument();
+}
+
 DEF_STD_CMD_A(CmdFemPostCreateLinearizedStressesFilter);
 
 CmdFemPostCreateLinearizedStressesFilter::CmdFemPostCreateLinearizedStressesFilter()
