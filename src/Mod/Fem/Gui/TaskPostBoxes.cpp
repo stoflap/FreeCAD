@@ -105,14 +105,10 @@ void PointMarker::customEvent(QEvent*)
     const SbVec3f& pt1 = vp->pCoords->point[0];
     const SbVec3f& pt2 = vp->pCoords->point[1];
 
-    if(m_name == "DataAtPoint"){
-       PointsChanged(pt1[0],pt1[1], pt1[2]);
-       Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Center = App.Vector(%f, %f, %f)", m_name.c_str(), pt1[0],pt1[1], pt1[2]);
-    }
-    else if (m_name == "DataAlongLine"){
-        PointsChanged(pt1[0],pt1[1], pt1[2], pt2[0],pt2[1], pt2[2]);
-        Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Point1 = App.Vector(%f, %f, %f)", m_name.c_str(), pt1[0],pt1[1], pt1[2]);
-        Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Point2 = App.Vector(%f, %f, %f)", m_name.c_str(), pt2[0],pt2[1], pt2[2]);
+    if(m_name == "DataAlongLine"){
+       PointsChanged(pt1[0],pt1[1], pt1[2], pt2[0],pt2[1], pt2[2]);
+       Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Point1 = App.Vector(%f, %f, %f)", m_name.c_str(), pt1[0],pt1[1], pt1[2]);
+       Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Point2 = App.Vector(%f, %f, %f)", m_name.c_str(), pt2[0],pt2[1], pt2[2]);
     }
     Gui::Command::doCommand(Gui::Command::Doc, ObjectInvisible().c_str());
 }
@@ -143,6 +139,79 @@ ViewProviderPointMarker::ViewProviderPointMarker()
 ViewProviderPointMarker::~ViewProviderPointMarker()
 {
     pCoords->unref();
+}
+
+// ----------------------------------------------------------------------------
+
+DataMarker::DataMarker(Gui::View3DInventorViewer* iv, std::string ObjName) : view(iv),
+    vp(new ViewProviderDataMarker)
+{
+    view->addViewProvider(vp);
+    m_name = ObjName;
+}
+
+DataMarker::~DataMarker()
+{
+    view->removeViewProvider(vp);
+    delete vp;
+}
+
+void DataMarker::addPoint(const SbVec3f& pt)
+{
+    int ct = countPoints();
+    vp->pCoords->point.set1Value(ct, pt);
+    vp->pMarker->numPoints=ct+1;
+}
+
+int DataMarker::countPoints() const
+{
+    return vp->pCoords->point.getNum();
+}
+
+void DataMarker::customEvent(QEvent*)
+{
+    const SbVec3f& pt1 = vp->pCoords->point[0];
+
+    if(m_name == "DataAtPoint"){
+       PointsChanged(pt1[0],pt1[1], pt1[2]);
+       Gui::Command::doCommand(Gui::Command::Doc,"App.ActiveDocument.%s.Center = App.Vector(%f, %f, %f)", m_name.c_str(), pt1[0],pt1[1], pt1[2]);
+    }
+    Gui::Command::doCommand(Gui::Command::Doc, ObjectInvisible().c_str());
+}
+
+std::string DataMarker::ObjectInvisible(){
+return "for amesh in App.activeDocument().Objects:\n\
+    if \"Mesh\" in amesh.TypeId:\n\
+         aparttoshow = amesh.Name.replace(\"_Mesh\",\"\")\n\
+         for apart in App.activeDocument().Objects:\n\
+             if aparttoshow == apart.Name:\n\
+                 apart.ViewObject.Visibility = False\n";
+}
+
+PROPERTY_SOURCE(FemGui::ViewProviderDataMarker, Gui::ViewProviderDocumentObject)
+
+ViewProviderDataMarker::ViewProviderDataMarker()
+{
+    pCoords = new SoCoordinate3();
+    pCoords->ref();
+    pCoords->point.setNum(0);
+
+    pMarker = new SoMarkerSet();
+    pMarker->markerIndex = SoMarkerSet::CIRCLE_FILLED_9_9;
+    pMarker->numPoints=0;
+    pMarker->ref();
+
+    SoGroup* grp = new SoGroup();
+    grp->addChild(pCoords);
+    grp->addChild(pMarker);
+    addDisplayMaskMode(grp, "Base");
+    setDisplayMaskMode("Base");
+}
+
+ViewProviderDataMarker::~ViewProviderDataMarker()
+{
+    pCoords->unref();
+    pMarker->unref();
 }
 
 //**************************************************************************
@@ -745,7 +814,7 @@ void TaskPostDataAtPoint::on_SelectPoint_clicked() {
         // require a delete.
         std::string ObjName = static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->Label.getValue();
 
-        FemGui::PointMarker* marker = new FemGui::PointMarker(viewer, ObjName);
+        FemGui::DataMarker* marker = new FemGui::DataMarker(viewer, ObjName);
         viewer->addEventCallback(SoMouseButtonEvent::getClassTypeId(),
             FemGui::TaskPostDataAtPoint::pointCallback, marker);
         connect(marker, SIGNAL(PointsChanged(double, double, double)), this, SLOT(onChange(double, double, double)));
@@ -784,7 +853,7 @@ void TaskPostDataAtPoint::pointCallback(void * ud, SoEventCallback * n)
 {
     const SoMouseButtonEvent * mbe = static_cast<const SoMouseButtonEvent*>(n->getEvent());
     Gui::View3DInventorViewer* view  = reinterpret_cast<Gui::View3DInventorViewer*>(n->getUserData());
-    PointMarker *pm = reinterpret_cast<PointMarker*>(ud);
+    DataMarker *pm = reinterpret_cast<DataMarker*>(ud);
 
     // Mark all incoming mouse button events as handled, especially, to deactivate the selection node
     n->getAction()->setHandled();

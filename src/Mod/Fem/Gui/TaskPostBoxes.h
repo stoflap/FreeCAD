@@ -67,7 +67,6 @@ public:
 
 Q_SIGNALS:
     void PointsChanged(double x1, double y1, double z1, double x2, double y2, double z2);
-    void PointsChanged(double x, double y, double z);
 
 protected:
     void customEvent(QEvent* e);
@@ -90,6 +89,45 @@ public:
 protected:
     SoCoordinate3    * pCoords;
     friend class PointMarker;
+};
+
+class ViewProviderDataMarker;
+class DataMarker : public QObject
+{
+    Q_OBJECT
+
+public:
+    DataMarker(Gui::View3DInventorViewer* view, std::string ObjName);
+    ~DataMarker();
+
+    void addPoint(const SbVec3f&);
+    int countPoints() const;
+
+Q_SIGNALS:
+    void PointsChanged(double x, double y, double z);
+
+protected:
+    void customEvent(QEvent* e);
+
+private:
+    Gui::View3DInventorViewer *view;
+    ViewProviderDataMarker *vp;
+    std::string m_name;
+    std::string ObjectInvisible();
+};
+
+class FemGuiExport ViewProviderDataMarker : public Gui::ViewProviderDocumentObject
+{
+    PROPERTY_HEADER(FemGui::ViewProviderDataMarker);
+
+public:
+    ViewProviderDataMarker();
+    virtual ~ViewProviderDataMarker();
+
+protected:
+    SoCoordinate3    * pCoords;
+    SoMarkerSet      * pMarker;
+    friend class DataMarker;
 };
 
 class TaskPostBox : public Gui::TaskView::TaskBox {
