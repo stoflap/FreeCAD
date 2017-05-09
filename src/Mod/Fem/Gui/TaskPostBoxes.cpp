@@ -44,6 +44,7 @@
 #include <Gui/Application.h>
 #include <Gui/Document.h>
 #include <Gui/Command.h>
+#include <Gui/MainWindow.h>
 #include <Gui/Action.h>
 #include <QMessageBox>
 #include <QPushButton>
@@ -161,6 +162,7 @@ void DataMarker::addPoint(const SbVec3f& pt)
     int ct = countPoints();
     vp->pCoords->point.set1Value(ct, pt);
     vp->pMarker->numPoints=ct+1;
+
 }
 
 int DataMarker::countPoints() const
@@ -195,7 +197,6 @@ ViewProviderDataMarker::ViewProviderDataMarker()
     pCoords = new SoCoordinate3();
     pCoords->ref();
     pCoords->point.setNum(0);
-
     pMarker = new SoMarkerSet();
     pMarker->markerIndex = SoMarkerSet::CIRCLE_FILLED_9_9;
     pMarker->numPoints=0;
@@ -888,7 +889,7 @@ void TaskPostDataAtPoint::on_Field_activated(int i) {
     getTypedView<ViewProviderFemPostObject>()->Field.setValue(i);
     std::string FieldName = ui->Field->currentText().toStdString();
     static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->FieldName.setValue(FieldName);
-    if ((FieldName == "Von Mises stress") || (FieldName == "Max shear stress(Tresca)") || (FieldName == "Maximum Principal stress") || (FieldName == "Minimum Principal stress") || (FieldName == "Median Principal stress") || (FieldName == "Stress vectors")){
+    if ((FieldName == "Von Mises stress") || (FieldName == "Max shear stress (Tresca)") || (FieldName == "Maximum Principal stress") || (FieldName == "Minimum Principal stress") || (FieldName == "Median Principal stress") || (FieldName == "Stress vectors")){
        static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->Unit.setValue("MPa");
     }
     else if (FieldName == "Displacement"){
@@ -897,7 +898,11 @@ void TaskPostDataAtPoint::on_Field_activated(int i) {
     else if (FieldName == "Temperature"){
        static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->Unit.setValue("K");
     }
-    std::string PointData = " The value at that location is " + std::to_string(static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->PointData[0]) + static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->Unit.getValue();
+
+    std::string PointData = " The value at that location is " + std::to_string(static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->PointData[0]) + " " +static_cast<Fem::FemPostDataAtPointFilter*>(getObject())->Unit.getValue() + "\n";
+    QMessageBox::information(Gui::getMainWindow(),
+    qApp->translate("CmdFemPostCreateDataAtPointFilter", "Data At Point"),
+    qApp->translate("CmdFemPostCreateDataAtPointFilter", PointData.c_str()));
     Base::Console().Error(PointData.c_str());
 }
 
